@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div>
+        <select class="select">
+            <option value="">请选择</option>
+            <option value="1">广西</option>
+            <option value="2">广东</option>
+            <option value="3">南宁</option>
+            <option value="4">厦门</option>
+            <option value="5">大理</option>
+            <option value="6">西藏</option>
+            <option value="7">南京</option>
+        </select>
+    </div>
+    <script src="jquery.js"></script>
+    <script>
+        function selectSYY(element) {
+            this.element = element
+            this.init();
+        }
+
+        selectSYY.prototype = {
+            init:function(){
+
+            }
+        }
+
+        
+    </script>
+</body>
+</html>
