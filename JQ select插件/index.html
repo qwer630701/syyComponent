@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        *{margin:0;padding:0;}
+        ul li,ol li{list-style-type:none;font-size:14px;}
+    </style>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div>
+    <div style="padding:40px;">
         <select class="select">
-            <option value="">请选择</option>
+            <option value="" selected>请选择</option>
             <option value="1">广西</option>
             <option value="2">广东</option>
             <option value="3">南宁</option>
@@ -21,16 +25,222 @@
     </div>
     <script src="jquery.js"></script>
     <script>
-        function selectSYY(element) {
+        function SelectSYY(element,option) {
+            var self = this;
             this.element = element
+            this.data = []
+            this.activeSelect;
+            this.doneCallback = (option && option.done) || null
             this.init();
+            this.bind();
+            this.bind();
+            $(document).on("click",function(){
+                $("body").children(".selectSYY-dropdown").remove();
+                self.activeSelect && self.activeSelect.length && self.activeSelect.next().children("input").blur()
+            })
+
+            $(document).on("click",".selectSYY-dropdown",function(e){
+                e.stopPropagation();
+                e.preventDefault();
+            })
         }
 
-        selectSYY.prototype = {
+        SelectSYY.prototype = {
             init:function(){
+                var doms = $(this.element);
+                for(var i=0;i<doms.length;i++){
+                    var dom = doms.eq(i);
+                    // dom.css({display:"none"});
+                    this.render(dom)
+                }
+            },
+            render:function(dom){
+                var text = dom.val() ? dom.find("option:selected").text() : "";
+                var fristOption = dom.find("option").eq(0);
+                var isRender = dom.attr("isRender");
+                if(isRender){
+                    dom.next().remove();
+                }
+                dom.attr("isRender",true);
+                var str = "<div class='selectSYY'>"
+                str += "<input type='text' placeholder='请选择' value='" + text + "'><i class='edge'></i>"
+                str +="</div>"
+                dom.after(str)
+            },
+            bind:function(){
+                $(document).off("click",".selectSYY")
+                $(document).on("click",".selectSYY",{self:this},this.selectPopup)
 
+                $(document).off("click",".selectSYY-dropdown li")
+                $(document).on("click",".selectSYY-dropdown li",{self:this},this.dropDownBind)
+
+                $(document).off("focus",".selectSYY input")
+                $(document).on("focus",".selectSYY input",{self:this},this.selectInputFocus)
+
+                $(document).off("blur",".selectSYY input")
+                $(document).on("blur",".selectSYY input",{self:this},this.selectInputBlur)
+            },
+            selectPopup:function(e){
+                e.stopPropagation();
+                e.preventDefault();
+                var body = $("body");
+                body.children(".selectSYY-dropdown").remove();
+                if($(this).hasClass("selected")){
+                    $(this).removeClass("selected")
+                    $(this).children().blur();
+                    e.data.self.activeSelect = ""
+                }else{
+                    $(this).addClass("selected")
+                    var select = $(this).prev();
+                    var option = select.find("option");
+                    var str = "";
+                    e.data.self.activeSelect = select; 
+                    if(option.length > 0){
+                        var activeValue = select.val()
+                        for(var i=0;i<option.length;i++){
+                            var item = option.eq(i);
+                            var itemValue = item.val()
+                            str += "<li lay-value='" + itemValue +"' " + 
+                            "class='" + (itemValue == activeValue ? 'active' : '') + ' ' +  (itemValue == "" ? 'tips' : '' )+"'>" + item.text() +"</li>"
+                        }
+                    }else{
+                        str += "<li class='tips empty'>没有数据</li>"
+                    }
+                    var dropDown = $("<div class='selectSYY-dropdown layui-anim layui-anim-upbit'><ul>" + str +"</ul></div>");
+                    dropDown.css({width:$(this).width(),left:$(this).offset().left,top:$(this).offset().top + $(this).height() + 5})
+                    body.append(dropDown);
+                    
+                    var item = dropDown.find(".active");
+                    if(item.length){
+                        var dropDownH = dropDown.outerHeight();
+                        var itemH = item.outerHeight();
+                        var offsetT = item[0].offsetTop;
+                        var scrollT = dropDown.scrollTop();
+                        if (offsetT < scrollT) { //向上移动
+                            dropDown.scrollTop(offsetT)
+                        } else if (offsetT > scrollT + dropDownH - itemH) { //向下移动
+                            dropDown.scrollTop(offsetT - dropDownH + itemH);
+                        }
+                    }
+                }
+            },
+            dropDownBind:function(e){
+                var self = e.data.self
+                if(!$(this).hasClass("empty") && self.activeSelect){
+                    var val = $(this).attr("lay-value");
+                    var text = $(this).html();
+                    self.activeSelect.val(val);
+                    self.activeSelect.next(".selectSYY").children("input").val(text);
+                    $(this).addClass("active").siblings().removeClass("active");
+                }
+                self.activeSelect.next().children("input").blur()
+                $("body").children(".selectSYY-dropdown").remove();
+            },
+            selectInputFocus:function(e){
+                var self = e.data.self;
+                $(this).off("input propertychange",e.data.self.selectInputChange)
+                $(this).on("input propertychange",{self:self},e.data.self.selectInputChange)
+
+                $(this).off("keydown",e.data.self.selectInputKeydown)
+                $(this).on("keydown",{self:self},e.data.self.selectInputKeydown)
+            },
+            selectInputKeydown:function(e){
+                var select = e.data.self.activeSelect;
+                var code = e.keyCode;
+                var dropDown = $("body").children(".selectSYY-dropdown")
+                if(dropDown.length == 0){
+                    $(this).off("keydown")
+                    return true;
+                }
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                    dropDown.find("li.active").click();
+                    select.next().children("input").blur()
+                }else if (e.keyCode === 38 || e.keyCode === 40) {
+                    e.preventDefault();
+                    var index = - 1;
+                    var li = dropDown.find("li:not(.empty)");
+    
+                    $.each(li, function (i) {
+                        if ($(this).hasClass("active"))index = i;
+                    })
+                    //下
+                    if(code == 40){
+                        if (index >= li.length - 1) return;
+                        index++;
+                    }else if(code == 38){
+                        if (index === 0) return;
+                        index > 0 ? index-- : index = 0;
+                    }
+
+                    var item = li.eq(index);
+
+                    var dropDownH = dropDown.outerHeight();
+                    var itemH = item.outerHeight();
+                    var offsetT = item[0].offsetTop;
+                    var scrollT = dropDown.scrollTop();
+                    if (offsetT < scrollT) { //向上移动
+                        dropDown.scrollTop(offsetT)
+                    } else if (offsetT > scrollT + dropDownH - itemH) { //向下移动
+                        dropDown.scrollTop(offsetT - dropDownH + itemH);
+                    }
+                    item.addClass("active").siblings().removeClass("active");
+                }
+            },
+            selectInputBlur:function(e){
+                var self = e.data.self;
+                $(this).off("input propertychange",self.selectInputChange)
+                self.done();
+            },
+            selectInputChange:function(e){
+                var select = e.data.self.activeSelect;
+                var option = select.find("option");
+                var dropDown = $("body").children(".selectSYY-dropdown")
+                var activeValue = select.val();
+                var val = $(this).val();
+                var data = [];
+                for(var i=0;i<option.length;i++){
+                    var item = option.eq(i);
+                    var text = item.text();
+                    if(text.indexOf(val) > -1){
+                        data.push({
+                            id:item.val(),
+                            text:item.text()
+                        })
+                    }
+                }
+                var str = ""
+                if(data.length > 0){
+                    for(var i=0;i<data.length;i++){
+                        var item = data[i];
+                        str += "<li lay-value='" + item.id +"' " + 
+                        "class='" + (item.id == activeValue ? 'active' : '') +"'>" + item.text +"</li>"
+                    }
+                }else{
+                    str += "<li class='tips empty'>没有数据</li>"
+                }
+                dropDown.children().empty().append(str)
+            },
+            done:function(){
+                var text = this.activeSelect.children("option:selected").text();
+                this.activeSelect.next().removeClass("selected").children("input").val(this.activeSelect.val() ? text : '')
+                this.doneCallback && this.doneCallback(this.activeSelect)
             }
         }
+
+        //节流
+        var throttleFuc = function(fn, delay){
+            var timer = null;
+            return function(){
+                var context = this, args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function(){
+                    fn.apply(context, args);
+                }, delay);
+            };
+        };
+
+        new SelectSYY(".select")
 
         
     </script>

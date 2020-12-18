@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="layui2x/css/layui.css">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="div" style="padding:20px;">
+        <input class="autoComplete">
+    </div>
+    
+    <script src="jquery.js"></script>
+    <script src="layui2x/layui.js"></script>
+    <script src="index.js"></script>
+    <script>
+        $(".autoComplete").autoCompleteTable({
+            isEmptySearch: true,
+            data: [{
+                    name: "他的歌",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+                {
+                    name: "123",
+                    code: "321",
+                    address: "广西桂林1",
+                    phone: "13999999999"
+                },
+                {
+                    name: "1666623",
+                    code: "321",
+                    address: "广西桂林",
+                    phone: "13999999999"
+                },
+            ],
+            column: [{
+                    key: "name",
+                    name: "姓名",
+                    align: "center",
+                    width: 80
+                },
+                {
+                    key: "code",
+                    name: "代码",
+                    align: "center",
+                    width: 80
+                },
+                {
+                    key: "phone",
+                    name: "手机",
+                    align: "center",
+                    width: 150
+                },
+                {
+                    key: "address",
+                    name: "地址",
+                    width: 200,
+                    headerAlign: "left"
+                }
+            ]
+        });
+    </script>
+</body>
+
+</html>

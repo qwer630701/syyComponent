@@ -1,0 +1,12 @@
+*{margin:0;padding:0;}
+.autoCompleteTable{border:1px solid #ddd;position: absolute;overflow:hidden;border-radius:4px;}
+.autoCompleteTable table{margin:0;width: 100%;background-color: #fff;color: #666;}
+.autoCompleteTable table tr{transition: all .3s;}
+.autoCompleteTable table td,.autoCompleteTable table th{position: relative;padding: 9px 15px;min-height: 20px;line-height: 20px;font-size: 14px;}
+.autoCompleteTable .layui-table td,.autoCompleteTable .layui-table th{padding:2px;}
+.autoCompleteTable .layui-table th{text-align:center;}
+/* .autoCompleteTable .layui-table tr:hover{background:#f8f8f8;} */
+.autoCompleteTable .table-header{overflow: scroll;margin-bottom: -19px;}
+.autoCompleteTable .table-body{overflow: scroll;}
+
+.autoCompleteTable .table-body tr.active{background:#8BC34A;color:#fff;}

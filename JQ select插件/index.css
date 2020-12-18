@@ -1,0 +1,91 @@
+.selectSYY{box-sizing: border-box;position: relative;}
+.selectSYY .edge{
+    box-sizing: border-box;
+    vertical-align: middle;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-width: 6px;
+    border-style: dashed;
+    border-color: transparent;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    margin-top: -3px;
+    cursor: pointer;
+    border-width: 6px;
+    border-top-color: #c2c2c2;
+    border-top-style: solid;
+    transition: all .3s;
+}
+
+.selectSYY.selected .edge{
+    margin-top: -9px;
+    transform: rotate(180deg);
+}
+
+.selectSYY input{
+    height: 38px;
+    line-height: 1.3;
+    line-height: 38px\9;
+    border-width: 1px;
+    border-style: solid;
+    background-color: #fff;
+    border-radius: 2px;
+    display: block;
+    width: 100%;
+    padding-left: 10px;
+    padding-right: 30px;
+    cursor: pointer;
+    box-sizing: border-box;
+    border-color: #e6e6e6;
+    outline: 0;
+    font-family: inherit;
+    font-size: 14px;
+    font-style: inherit;
+    font-weight: inherit;
+    margin: 0;
+}
+
+.selectSYY-dropdown{
+    position: absolute;
+    max-height:200px;
+    padding: 5px 0;
+    z-index: 999;
+    background:#fff;
+    border:1px solid #d2d2d2;
+    overflow-y: auto;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,.12);
+    box-sizing: border-box;
+
+}
+
+
+.selectSYY-dropdown li{
+    padding: 0 10px;
+    line-height: 36px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.selectSYY-dropdown li:hover{
+  background-color: #f2f2f2;
+  -webkit-transition: .5s all;
+  transition: .5s all;
+}
+
+.selectSYY-dropdown li.tips{
+  color: #999;
+}
+
+.selectSYY-dropdown li.active{
+  background-color: #5FB878;
+  color: #fff;
+}
+
+.selectSYY-dropdown li.empty{
+  text-align: center;
+}
