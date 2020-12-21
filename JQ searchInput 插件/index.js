@@ -2,10 +2,12 @@
     var autoCompleteTable = (function () {
 
         var defaultOption = {
-            method: 'get',
+            method: 'post',
+            position:"bottom",
             delay: 400,
-            pageField: "offset",
-            sizeField: "limit",
+            valueField:"Name",
+            pageField: "Offset",
+            sizeField: "Limit",
             pageIndex: 1,
             pageSize: "5",
             height:250,
@@ -21,7 +23,7 @@
 
         function autoCompleteTable(element, options) {
             this.abort;
-            this.option = $.extend(true, defaultOption, options || {});
+            this.autoOption = $.extend(true,  {},defaultOption,options || {});
             this.element = element;
             this.element.attr("autocomplete", "off")
             this.init()
@@ -30,12 +32,12 @@
         autoCompleteTable.prototype = {
             init: function () {
                 var self = this;
-                if(this.option.isEmptySearch){
-                    console.log(this.element)
-                    $(this.element).off("focus").off("blur");
-                    $(this.element).on("focus", function () {
-                        $(this).on("keydown",self.keydown)
-                        self.reload($(this).val())
+                if(this.autoOption.isEmptySearch){
+                    $(self.element).off("focus").off("blur");
+                    $(self.element).on("focus",{self:self}, function (e) {
+                        if($("body > .autoCompleteTable").length)return;
+                        $(this).on("keydown",e.data.self.keydown)
+                        e.data.self.reload($(this).val())
                     }).on("blur",function(){
                         $(this).off("keydown",self.keydown)
                     })
@@ -43,9 +45,8 @@
 
                 $(this.element).off("input propertychange")
                 $(this.element).on("input propertychange", throttleFuc(function () {
-                    console.log("input propertychange")
                     self.reload($(this).val())
-                }, this.option.delay))
+                }, self.autoOption.delay))
 
                 $(document).on("click",function(){
                     $("body").children(".autoCompleteTable").remove();
@@ -56,8 +57,8 @@
                     self.stop(e)
                 })
 
-                $(this.element).off("click",self.stop)
-                $(this.element).on("click",self.stop)
+                $(self.element).off("click",self.stop)
+                $(self.element).on("click",self.stop)
             },
             keydown: function (e) {
                 var code = e.keyCode;
@@ -108,59 +109,93 @@
             },
             reload: function (val) {
                 var self = this;
-                var url = this.option.url
+                var url = this.autoOption.url
                 if(url){
-                    self.dropdownLoading();
+                    var autoOption = this.autoOption;
+                    self.popupLoadingRender();
                     self.abort && self.abort.abort();
-                    var data = {
-                        [this.option.urlKey]: val
+
+
+                    var params = {
+                        [autoOption.valueField]: val,
+                        [autoOption.pageField]: autoOption.pageIndex,
+                        [autoOption.sizeField]: autoOption.pageSize,
                     };
-                    if (this.option.ajaxBefore) {
-                        data = this.option.ajaxBefore(data);
+                    if (self.autoOption.ajaxBefore) {
+                        params = self.autoOption.ajaxBefore(params);
                     }
                     self.abort = $.ajax({
-                        type: this.option.method,
-                        url: this.option.url,
+                        type: this.autoOption.method,
+                        url: this.autoOption.url,
                         dataType: "json",
-                        data: data,
+                        data: params,
                         success: function (data) {
-                            if(self.option.renderBefore){
-                                data = self.option.renderBefore(data);
+                            if(self.autoOption.renderBefore){
+                                var rows = self.autoOption.renderBefore(data);
                             }
-                            self.popupRender(data);
+                            console.log(rows)
+                            if(rows === false){
+                                $("body > .autoCompleteTable").find(".table-body").empty().append("<div class='loading'><span>请求出错</span></div>")
+                            }else if(rows.length == 0){
+                                $("body > .autoCompleteTable").find(".table-body").empty().append("<div class='loading'><span>没有数据</span></div>")
+                            }else{
+                                self.popupRender(rows);
+                            }
                         },
                         error: function () {
-                            self.option.error && self.option.error();
+                            $("body > .autoCompleteTable").find(".loading span").html("请求出错")
+                            self.autoOption.error && self.autoOption.error();
                         }
                     });
                 }else{
-                    var data = this.option.data;
-                    if(self.option.renderBefore){
-                        data = self.option.renderBefore(data);
+                    var data = self.autoOption.data;
+                    if(self.autoOption.renderBefore){
+                        data = self.autoOption.renderBefore(data);
                     }
-                    this.popupRender(data);
+                    self.popupRender(data);
                 }
+            },
+            popupLoadingRender:function(){
+                var popup = $("body > .autoCompleteTable");
+                if(!popup.length){
+                    popup = $("<div class='autoCompleteTable'></div>");
+                    $("body").append(popup);
+                }
+                var width = this.autoOption.width;
+                var height = this.autoOption.height;
+                var input = this.element;
+                // popup.empty();
+                var tableHeader = this.tableHeaderRender()
+                popup.append(tableHeader)
+                popup.append("<div class='table-body'></div>")
+                var tableBody = popup.find(".table-body")
+                tableBody.empty().append("<div class='loading'><span>加载中...</span></div>")
+                tableBody.css("height",height - tableHeader.height() + 19)
+                var top
+                if(this.autoOption.position == "bottom"){
+                    top = input.offset().top + input.height() + 10;
+                }else{
+                    top = input.offset().top - height - 5
+                }
+                popup.css({width:width,height:height,left:input.offset().left,top:top})
+
             },
             popupRender:function(data){
                 this.listData = data;
                 var self = this;
                 var popup = $("body > .autoCompleteTable");
                 if(!popup.length){
-                    popup = $("<div class='autoCompleteTable layui-anim layui-anim-upbit'></div>");
+                    popup = $("<div class='autoCompleteTable'></div>");
                     $("body").append(popup);
                 }
                 
-                var tableHeader = this.tableHeaderRender()
-                var tableBody = this.tableBodyRender(data)
-                popup.empty();
-                popup.append(tableHeader)
-                popup.append(tableBody)
                 
-                var width = this.option.width;
-                var height = this.option.height;
-                var input = this.element;
-                tableBody.css("max-height",height - tableHeader.height() + 19)
-                popup.css({width:width,height:height,left:input.offset().left,top:input.offset().top + input.height() + 10})
+                // var tableBody = this.tableBodyRender(data)
+                var tableBody = popup.find(".table-body");
+                // tableBody.css("height",height - tableHeader.height() + 19)
+
+                tableBody.empty().append(this.tableBodyRender(data))
+                
 
                 tableBody.on("scroll",function(e){
                     self.stop(e);
@@ -170,30 +205,31 @@
                 tableBody.find("tr").on("click",function(){
                     var index = $(this).index();
                     $(this).addClass("active").siblings().removeClass("active")
+                    self.element.blur();
                     self.done && self.done(index);
                 })
             },
             tableHeaderRender(){
-                var column = this.option.column;
+                var column = this.autoOption.column;
                 var tableHeader = $("<div class='table-header'><table class='layui-table'><thead><tr></tr></thead></table></div>")
                 var tableHeaderTr = tableHeader.find("tr");
                 for(var i=0;i<column.length;i++){
                     var item = column[i];
                     var th = $("<th align='" + (item.headerAlign ? item.headerAlign : 'center')  +"'><div>" + item.name +"</div></th>")
-                    th.children("div").css("width",item.width || 80);
+                    th.children("div").css("min-width",item.width || 80);
                     tableHeaderTr.append(th);
                 }
                 return tableHeader
             },
             tableBodyRender(data){
-                var column = this.option.column;
-                var tableBody = $("<div class='table-body'><table class='layui-table'><tbody></tbody></table></div>")
+                var column = this.autoOption.column;
+                var tableBody = $("<table class='layui-table'><tbody></tbody></table>")
                 for(var i=0;i<data.length;i++){
                     var tr = $("<tr></tr>")
                     for(var j=0;j<column.length;j++){
                         var item = column[j];
                         var td = $("<td align='" + (item.align ? item.align : 'left')  +"'><div>" + (data[i][item.key] || "") +"</div></td>")
-                        td.children("div").css("width",item.width || 80);
+                        td.children("div").css("min-width",item.width || 80);
                         tr.append(td);
                     }
                     tableBody.find("tbody").append(tr);
@@ -205,8 +241,8 @@
                 e.preventDefault();
             },
             done:function(index){
-                this.option.done && this.option.done(this.listData[index],this.element)
-                this.hide();
+                this.autoOption.done && this.autoOption.done(this.listData[index],this.element)
+                if(!this.element.is(":focus"))this.hide();
             },
             hide:function(){
                 $("body > .autoCompleteTable").remove();
